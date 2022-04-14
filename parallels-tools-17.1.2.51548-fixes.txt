@@ -1,0 +1,27 @@
+diff -puNr parallels-tools-17.1.2.51548.orig/Makefile.kmods parallels-tools-17.1.2.51548/Makefile.kmods
+--- parallels-tools-17.1.2.51548.orig/Makefile.kmods	2022-03-16 19:41:50.000000000 +0000
++++ parallels-tools-17.1.2.51548/Makefile.kmods	2022-03-31 22:59:35.051518537 +0000
+@@ -22,7 +22,7 @@ ifeq "$(wildcard $(KERNEL_DIR)/include/l
+ else
+ 	VERSION_H_PATH ?= $(KERNEL_DIR)/include/linux/version.h
+ endif
+-VERSION_CODE := $(shell awk '/\#define[ \t]+LINUX_VERSION_CODE[ \t]\
++VERSION_CODE := $(shell awk '/#define[ \t]+LINUX_VERSION_CODE[ \t]\
+ 		*/ { print $$3 }' $(VERSION_H_PATH) | tail -n 1)
+ 
+ ifndef PRL_VID_SKIP
+diff -puNr parallels-tools-17.1.2.51548.orig/prl_tg/Toolgate/Guest/Linux/prl_tg/prltg.c parallels-tools-17.1.2.51548/prl_tg/Toolgate/Guest/Linux/prl_tg/prltg.c
+--- parallels-tools-17.1.2.51548.orig/prl_tg/Toolgate/Guest/Linux/prl_tg/prltg.c	2022-03-16 19:38:48.000000000 +0000
++++ parallels-tools-17.1.2.51548/prl_tg/Toolgate/Guest/Linux/prl_tg/prltg.c	2022-03-31 23:44:03.050844274 +0000
+@@ -249,7 +249,11 @@ static ssize_t prl_tg_write(struct file
+ 	size_t nbytes, loff_t *ppos)
+ {
+ 	int ret = 0;
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5,17,0)
+ 	struct tg_dev *dev = PDE_DATA(FILE_DENTRY(filp)->d_inode);
++#else
++	struct tg_dev *dev = pde_data(FILE_DENTRY(filp)->d_inode);
++#endif
+ 	void *ureq = NULL;
+ 	TG_REQ_DESC sdesc;
+ 	TG_REQUEST src;
